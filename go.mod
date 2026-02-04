@@ -10,7 +10,7 @@ require (
 	github.com/goccy/go-yaml v1.18.0
 	github.com/itchyny/json2yaml v0.1.4
 	github.com/muesli/reflow v0.3.0
-	github.com/stainless-sdks/strezless-musick-nexus-metadata-go v0.0.0-20260204032119-c2c2c77d6fda
+	github.com/stainless-sdks/strezless-musick-nexus-metadata-go v0.0.0-20260204032224-e935bb428997
 	github.com/stretchr/testify v1.10.0
 	github.com/tidwall/gjson v1.18.0
 	github.com/tidwall/pretty v1.2.1
