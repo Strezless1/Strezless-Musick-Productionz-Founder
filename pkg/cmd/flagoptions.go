@@ -15,10 +15,10 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/stainless-sdks/strezless-musick-nexus-metadata-cli/internal/apiform"
-	"github.com/stainless-sdks/strezless-musick-nexus-metadata-cli/internal/apiquery"
-	"github.com/stainless-sdks/strezless-musick-nexus-metadata-cli/internal/debugmiddleware"
-	"github.com/stainless-sdks/strezless-musick-nexus-metadata-cli/internal/requestflag"
+	"github.com/omar-orrantia/Strezless-Musick-Productionz-Founder/internal/apiform"
+	"github.com/omar-orrantia/Strezless-Musick-Productionz-Founder/internal/apiquery"
+	"github.com/omar-orrantia/Strezless-Musick-Productionz-Founder/internal/debugmiddleware"
+	"github.com/omar-orrantia/Strezless-Musick-Productionz-Founder/internal/requestflag"
 	"github.com/stainless-sdks/strezless-musick-nexus-metadata-go/option"
 
 	"github.com/goccy/go-yaml"

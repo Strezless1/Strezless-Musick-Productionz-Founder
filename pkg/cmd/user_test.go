@@ -5,8 +5,8 @@ package cmd
 import (
 	"testing"
 
-	"github.com/stainless-sdks/strezless-musick-nexus-metadata-cli/internal/mocktest"
-	"github.com/stainless-sdks/strezless-musick-nexus-metadata-cli/internal/requestflag"
+	"github.com/omar-orrantia/Strezless-Musick-Productionz-Founder/internal/mocktest"
+	"github.com/omar-orrantia/Strezless-Musick-Productionz-Founder/internal/requestflag"
 )
 
 func TestUserCreate(t *testing.T) {

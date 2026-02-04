@@ -14,7 +14,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/stainless-sdks/strezless-musick-nexus-metadata-cli/internal/jsonview"
+	"github.com/omar-orrantia/Strezless-Musick-Productionz-Founder/internal/jsonview"
 	"github.com/stainless-sdks/strezless-musick-nexus-metadata-go/option"
 
 	"github.com/charmbracelet/x/term"

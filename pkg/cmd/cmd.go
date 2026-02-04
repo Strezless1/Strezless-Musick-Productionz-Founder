@@ -11,7 +11,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/stainless-sdks/strezless-musick-nexus-metadata-cli/internal/autocomplete"
+	"github.com/omar-orrantia/Strezless-Musick-Productionz-Founder/internal/autocomplete"
 	docs "github.com/urfave/cli-docs/v3"
 	"github.com/urfave/cli/v3"
 )
