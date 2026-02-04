@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/stainless-sdks/strezless-musick-nexus-metadata-cli/internal/apiquery"
+	"github.com/omar-orrantia/Strezless-Musick-Productionz-Founder/internal/apiquery"
 	"github.com/stainless-sdks/strezless-musick-nexus-metadata-go"
 	"github.com/stainless-sdks/strezless-musick-nexus-metadata-go/option"
 	"github.com/tidwall/gjson"

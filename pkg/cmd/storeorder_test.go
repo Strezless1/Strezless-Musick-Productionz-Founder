@@ -5,7 +5,7 @@ package cmd
 import (
 	"testing"
 
-	"github.com/stainless-sdks/strezless-musick-nexus-metadata-cli/internal/mocktest"
+	"github.com/omar-orrantia/Strezless-Musick-Productionz-Founder/internal/mocktest"
 )
 
 func TestStoreOrderCreate(t *testing.T) {

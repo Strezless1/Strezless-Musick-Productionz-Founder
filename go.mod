@@ -1,4 +1,4 @@
-module github.com/stainless-sdks/strezless-musick-nexus-metadata-cli
+module github.com/omar-orrantia/Strezless-Musick-Productionz-Founder
 
 go 1.25
 

@@ -10,7 +10,7 @@ import (
 	"os"
 	"slices"
 
-	"github.com/stainless-sdks/strezless-musick-nexus-metadata-cli/pkg/cmd"
+	"github.com/omar-orrantia/Strezless-Musick-Productionz-Founder/pkg/cmd"
 	"github.com/stainless-sdks/strezless-musick-nexus-metadata-go"
 	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
