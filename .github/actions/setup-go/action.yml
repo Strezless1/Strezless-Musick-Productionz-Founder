@@ -10,7 +10,7 @@ runs:
     - uses: stainless-api/retrieve-github-access-token@v1
       id: get_token
       with:
-        repo: stainless-sdks/strezless-musick-nexus-metadata-go
+        repo: github.com/stainless-sdks/strezless-musick-nexus-metadata-go
         stainless-api-key: ${{ inputs.stainless-api-key }}
 
     - name: Configure Git for private Go modules
