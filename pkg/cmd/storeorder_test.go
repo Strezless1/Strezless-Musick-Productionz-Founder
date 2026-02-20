@@ -9,7 +9,7 @@ import (
 )
 
 func TestStoreOrderCreate(t *testing.T) {
-	t.Skip("Prism tests are disabled")
+	t.Skip("Mock server tests are disabled")
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"store:order", "create",
@@ -23,7 +23,7 @@ func TestStoreOrderCreate(t *testing.T) {
 }
 
 func TestStoreOrderRetrieve(t *testing.T) {
-	t.Skip("Prism tests are disabled")
+	t.Skip("Mock server tests are disabled")
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"store:order", "retrieve",
@@ -32,7 +32,7 @@ func TestStoreOrderRetrieve(t *testing.T) {
 }
 
 func TestStoreOrderDelete(t *testing.T) {
-	t.Skip("Prism tests are disabled")
+	t.Skip("Mock server tests are disabled")
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"store:order", "delete",

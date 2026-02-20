@@ -10,7 +10,7 @@ import (
 )
 
 func TestPetCreate(t *testing.T) {
-	t.Skip("Prism tests are disabled")
+	t.Skip("Mock server tests are disabled")
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"pet", "create",
@@ -41,7 +41,7 @@ func TestPetCreate(t *testing.T) {
 }
 
 func TestPetRetrieve(t *testing.T) {
-	t.Skip("Prism tests are disabled")
+	t.Skip("Mock server tests are disabled")
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"pet", "retrieve",
@@ -50,7 +50,7 @@ func TestPetRetrieve(t *testing.T) {
 }
 
 func TestPetUpdate(t *testing.T) {
-	t.Skip("Prism tests are disabled")
+	t.Skip("Mock server tests are disabled")
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"pet", "update",
@@ -81,7 +81,7 @@ func TestPetUpdate(t *testing.T) {
 }
 
 func TestPetDelete(t *testing.T) {
-	t.Skip("Prism tests are disabled")
+	t.Skip("Mock server tests are disabled")
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"pet", "delete",
@@ -90,7 +90,7 @@ func TestPetDelete(t *testing.T) {
 }
 
 func TestPetFindByStatus(t *testing.T) {
-	t.Skip("Prism tests are disabled")
+	t.Skip("Mock server tests are disabled")
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"pet", "find-by-status",
@@ -99,7 +99,7 @@ func TestPetFindByStatus(t *testing.T) {
 }
 
 func TestPetFindByTags(t *testing.T) {
-	t.Skip("Prism tests are disabled")
+	t.Skip("Mock server tests are disabled")
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"pet", "find-by-tags",
@@ -108,7 +108,7 @@ func TestPetFindByTags(t *testing.T) {
 }
 
 func TestPetUpdateWithForm(t *testing.T) {
-	t.Skip("Prism tests are disabled")
+	t.Skip("Mock server tests are disabled")
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"pet", "update-with-form",
@@ -119,7 +119,7 @@ func TestPetUpdateWithForm(t *testing.T) {
 }
 
 func TestPetUploadImage(t *testing.T) {
-	t.Skip("Prism tests are disabled")
+	t.Skip("Mock server tests are disabled")
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"pet", "upload-image",
