@@ -10,7 +10,7 @@ import (
 )
 
 func TestUserCreate(t *testing.T) {
-	t.Skip("Prism tests are disabled")
+	t.Skip("Mock server tests are disabled")
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"user", "create",
@@ -26,7 +26,7 @@ func TestUserCreate(t *testing.T) {
 }
 
 func TestUserRetrieve(t *testing.T) {
-	t.Skip("Prism tests are disabled")
+	t.Skip("Mock server tests are disabled")
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"user", "retrieve",
@@ -35,7 +35,7 @@ func TestUserRetrieve(t *testing.T) {
 }
 
 func TestUserUpdate(t *testing.T) {
-	t.Skip("Prism tests are disabled")
+	t.Skip("Mock server tests are disabled")
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"user", "update",
@@ -52,7 +52,7 @@ func TestUserUpdate(t *testing.T) {
 }
 
 func TestUserDelete(t *testing.T) {
-	t.Skip("Prism tests are disabled")
+	t.Skip("Mock server tests are disabled")
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"user", "delete",
@@ -61,7 +61,7 @@ func TestUserDelete(t *testing.T) {
 }
 
 func TestUserCreateWithList(t *testing.T) {
-	t.Skip("Prism tests are disabled")
+	t.Skip("Mock server tests are disabled")
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"user", "create-with-list",
@@ -87,7 +87,7 @@ func TestUserCreateWithList(t *testing.T) {
 }
 
 func TestUserLogin(t *testing.T) {
-	t.Skip("Prism tests are disabled")
+	t.Skip("Mock server tests are disabled")
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"user", "login",
@@ -97,7 +97,7 @@ func TestUserLogin(t *testing.T) {
 }
 
 func TestUserLogout(t *testing.T) {
-	t.Skip("Prism tests are disabled")
+	t.Skip("Mock server tests are disabled")
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"user", "logout",
