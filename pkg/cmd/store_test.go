@@ -13,5 +13,6 @@ func TestStoreListInventory(t *testing.T) {
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"store", "list-inventory",
+		"--api-key", "string",
 	)
 }

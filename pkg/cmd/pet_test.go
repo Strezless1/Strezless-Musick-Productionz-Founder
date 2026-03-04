@@ -14,6 +14,7 @@ func TestPetCreate(t *testing.T) {
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"pet", "create",
+		"--api-key", "string",
 		"--name", "doggie",
 		"--photo-url", "string",
 		"--id", "10",
@@ -45,6 +46,7 @@ func TestPetRetrieve(t *testing.T) {
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"pet", "retrieve",
+		"--api-key", "string",
 		"--pet-id", "0",
 	)
 }
@@ -54,6 +56,7 @@ func TestPetUpdate(t *testing.T) {
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"pet", "update",
+		"--api-key", "string",
 		"--name", "doggie",
 		"--photo-url", "string",
 		"--id", "10",
@@ -85,6 +88,7 @@ func TestPetDelete(t *testing.T) {
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"pet", "delete",
+		"--api-key", "string",
 		"--pet-id", "0",
 	)
 }
@@ -94,6 +98,7 @@ func TestPetFindByStatus(t *testing.T) {
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"pet", "find-by-status",
+		"--api-key", "string",
 		"--status", "available",
 	)
 }
@@ -103,6 +108,7 @@ func TestPetFindByTags(t *testing.T) {
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"pet", "find-by-tags",
+		"--api-key", "string",
 		"--tag", "string",
 	)
 }
@@ -112,6 +118,7 @@ func TestPetUpdateWithForm(t *testing.T) {
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"pet", "update-with-form",
+		"--api-key", "string",
 		"--pet-id", "0",
 		"--name", "name",
 		"--status", "status",
@@ -123,8 +130,9 @@ func TestPetUploadImage(t *testing.T) {
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"pet", "upload-image",
+		"--api-key", "string",
 		"--pet-id", "0",
-		"--body", mocktest.TestFile(t, ""),
+		"--body", mocktest.TestFile(t, "..."),
 		"--additional-metadata", "additionalMetadata",
 	)
 }

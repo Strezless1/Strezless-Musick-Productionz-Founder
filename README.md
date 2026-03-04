@@ -49,18 +49,22 @@ strezless-musick-nexus-metadata [resource] <command> [flags...]
 
 ```sh
 strezless-musick-nexus-metadata pet update \
+  --api-key 'My API Key' \
   --name doggie \
-  --photo-url string \
-  --id 10 \
-  --category '{id: 1, name: Dogs}' \
-  --status available \
-  --tag '{id: 0, name: name}'
+  --photo-url string
 ```
 
 For details about specific commands, use the `--help` flag.
 
-### Global Flags
+### Environment variables
 
+| Environment variable                      | Required |
+| ----------------------------------------- | -------- |
+| `STREZLESS_MUSICK_NEXUS_METADATA_API_KEY` | yes      |
+
+### Global flags
+
+- `--api-key` (can also be set with `STREZLESS_MUSICK_NEXUS_METADATA_API_KEY` env var)
 - `--help` - Show command line usage
 - `--debug` - Enable debug logging (includes HTTP request/response details)
 - `--version`, `-v` - Show the CLI version
