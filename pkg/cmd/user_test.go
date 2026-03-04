@@ -14,6 +14,7 @@ func TestUserCreate(t *testing.T) {
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"user", "create",
+		"--api-key", "string",
 		"--id", "10",
 		"--email", "john@email.com",
 		"--first-name", "John",
@@ -30,6 +31,7 @@ func TestUserRetrieve(t *testing.T) {
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"user", "retrieve",
+		"--api-key", "string",
 		"--username", "username",
 	)
 }
@@ -39,6 +41,7 @@ func TestUserUpdate(t *testing.T) {
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"user", "update",
+		"--api-key", "string",
 		"--existing-username", "username",
 		"--id", "10",
 		"--email", "john@email.com",
@@ -56,6 +59,7 @@ func TestUserDelete(t *testing.T) {
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"user", "delete",
+		"--api-key", "string",
 		"--username", "username",
 	)
 }
@@ -65,6 +69,7 @@ func TestUserCreateWithList(t *testing.T) {
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"user", "create-with-list",
+		"--api-key", "string",
 		"--body", "{id: 10, email: john@email.com, firstName: John, lastName: James, password: '12345', phone: '12345', username: theUser, userStatus: 1}",
 	)
 
@@ -91,6 +96,7 @@ func TestUserLogin(t *testing.T) {
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"user", "login",
+		"--api-key", "string",
 		"--password", "password",
 		"--username", "username",
 	)
@@ -101,5 +107,6 @@ func TestUserLogout(t *testing.T) {
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"user", "logout",
+		"--api-key", "string",
 	)
 }
