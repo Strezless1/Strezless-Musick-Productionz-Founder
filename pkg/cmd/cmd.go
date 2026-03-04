@@ -3,6 +3,7 @@
 package cmd
 
 import (
+	"bytes"
 	"compress/gzip"
 	"context"
 	"fmt"
@@ -18,15 +19,17 @@ import (
 )
 
 var (
-	Command *cli.Command
+	Command            *cli.Command
+	CommandErrorBuffer bytes.Buffer
 )
 
 func init() {
 	Command = &cli.Command{
-		Name:    "strezless-musick-nexus-metadata",
-		Usage:   "CLI for the strezless-musick-nexus-metadata API",
-		Suggest: true,
-		Version: Version,
+		Name:      "strezless-musick-nexus-metadata",
+		Usage:     "CLI for the strezless-musick-nexus-metadata API",
+		Suggest:   true,
+		Version:   Version,
+		ErrWriter: &CommandErrorBuffer,
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
 				Name:  "debug",
