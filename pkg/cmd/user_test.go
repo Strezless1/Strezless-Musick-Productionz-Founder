@@ -80,6 +80,7 @@ func TestUserCreateWithList(t *testing.T) {
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"user", "create-with-list",
+		"--api-key", "string",
 		"--body.id", "10",
 		"--body.email", "john@email.com",
 		"--body.first-name", "John",

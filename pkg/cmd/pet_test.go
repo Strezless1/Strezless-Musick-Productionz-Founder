@@ -30,6 +30,7 @@ func TestPetCreate(t *testing.T) {
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"pet", "create",
+		"--api-key", "string",
 		"--name", "doggie",
 		"--photo-url", "string",
 		"--id", "10",
@@ -72,6 +73,7 @@ func TestPetUpdate(t *testing.T) {
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"pet", "update",
+		"--api-key", "string",
 		"--name", "doggie",
 		"--photo-url", "string",
 		"--id", "10",
