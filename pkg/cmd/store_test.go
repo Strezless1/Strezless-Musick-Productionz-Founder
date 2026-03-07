@@ -10,9 +10,10 @@ import (
 
 func TestStoreListInventory(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
-	mocktest.TestRunMockTestWithFlags(
-		t,
-		"store", "list-inventory",
-		"--api-key", "string",
-	)
+	t.Run("regular flags", func(t *testing.T) {
+		mocktest.TestRunMockTestWithFlags(
+			t, "store", "list-inventory",
+			"--api-key", "string",
+		)
+	})
 }

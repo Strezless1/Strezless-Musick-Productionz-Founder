@@ -11,130 +11,191 @@ import (
 
 func TestPetCreate(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
-	mocktest.TestRunMockTestWithFlags(
-		t,
-		"pet", "create",
-		"--api-key", "string",
-		"--name", "doggie",
-		"--photo-url", "string",
-		"--id", "10",
-		"--category", "{id: 1, name: Dogs}",
-		"--status", "available",
-		"--tag", "{id: 0, name: name}",
-	)
+	t.Run("regular flags", func(t *testing.T) {
+		mocktest.TestRunMockTestWithFlags(
+			t, "pet", "create",
+			"--api-key", "string",
+			"--name", "doggie",
+			"--photo-url", "string",
+			"--id", "10",
+			"--category", "{id: 1, name: Dogs}",
+			"--status", "available",
+			"--tag", "{id: 0, name: name}",
+		)
+	})
 
-	// Check that inner flags have been set up correctly
-	requestflag.CheckInnerFlags(petCreate)
+	t.Run("inner flags", func(t *testing.T) {
+		// Check that inner flags have been set up correctly
+		requestflag.CheckInnerFlags(petCreate)
 
-	// Alternative argument passing style using inner flags
-	mocktest.TestRunMockTestWithFlags(
-		t,
-		"pet", "create",
-		"--api-key", "string",
-		"--name", "doggie",
-		"--photo-url", "string",
-		"--id", "10",
-		"--category.id", "1",
-		"--category.name", "Dogs",
-		"--status", "available",
-		"--tag.id", "0",
-		"--tag.name", "name",
-	)
+		// Alternative argument passing style using inner flags
+		mocktest.TestRunMockTestWithFlags(
+			t, "pet", "create",
+			"--api-key", "string",
+			"--name", "doggie",
+			"--photo-url", "string",
+			"--id", "10",
+			"--category.id", "1",
+			"--category.name", "Dogs",
+			"--status", "available",
+			"--tag.id", "0",
+			"--tag.name", "name",
+		)
+	})
+
+	t.Run("piping data", func(t *testing.T) {
+		// Test piping YAML data over stdin
+		pipeData := []byte("" +
+			"name: doggie\n" +
+			"photoUrls:\n" +
+			"  - string\n" +
+			"id: 10\n" +
+			"category:\n" +
+			"  id: 1\n" +
+			"  name: Dogs\n" +
+			"status: available\n" +
+			"tags:\n" +
+			"  - id: 0\n" +
+			"    name: name\n")
+		mocktest.TestRunMockTestWithPipeAndFlags(
+			t, pipeData, "pet", "create",
+			"--api-key", "string",
+		)
+	})
 }
 
 func TestPetRetrieve(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
-	mocktest.TestRunMockTestWithFlags(
-		t,
-		"pet", "retrieve",
-		"--api-key", "string",
-		"--pet-id", "0",
-	)
+	t.Run("regular flags", func(t *testing.T) {
+		mocktest.TestRunMockTestWithFlags(
+			t, "pet", "retrieve",
+			"--api-key", "string",
+			"--pet-id", "0",
+		)
+	})
 }
 
 func TestPetUpdate(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
-	mocktest.TestRunMockTestWithFlags(
-		t,
-		"pet", "update",
-		"--api-key", "string",
-		"--name", "doggie",
-		"--photo-url", "string",
-		"--id", "10",
-		"--category", "{id: 1, name: Dogs}",
-		"--status", "available",
-		"--tag", "{id: 0, name: name}",
-	)
+	t.Run("regular flags", func(t *testing.T) {
+		mocktest.TestRunMockTestWithFlags(
+			t, "pet", "update",
+			"--api-key", "string",
+			"--name", "doggie",
+			"--photo-url", "string",
+			"--id", "10",
+			"--category", "{id: 1, name: Dogs}",
+			"--status", "available",
+			"--tag", "{id: 0, name: name}",
+		)
+	})
 
-	// Check that inner flags have been set up correctly
-	requestflag.CheckInnerFlags(petUpdate)
+	t.Run("inner flags", func(t *testing.T) {
+		// Check that inner flags have been set up correctly
+		requestflag.CheckInnerFlags(petUpdate)
 
-	// Alternative argument passing style using inner flags
-	mocktest.TestRunMockTestWithFlags(
-		t,
-		"pet", "update",
-		"--api-key", "string",
-		"--name", "doggie",
-		"--photo-url", "string",
-		"--id", "10",
-		"--category.id", "1",
-		"--category.name", "Dogs",
-		"--status", "available",
-		"--tag.id", "0",
-		"--tag.name", "name",
-	)
+		// Alternative argument passing style using inner flags
+		mocktest.TestRunMockTestWithFlags(
+			t, "pet", "update",
+			"--api-key", "string",
+			"--name", "doggie",
+			"--photo-url", "string",
+			"--id", "10",
+			"--category.id", "1",
+			"--category.name", "Dogs",
+			"--status", "available",
+			"--tag.id", "0",
+			"--tag.name", "name",
+		)
+	})
+
+	t.Run("piping data", func(t *testing.T) {
+		// Test piping YAML data over stdin
+		pipeData := []byte("" +
+			"name: doggie\n" +
+			"photoUrls:\n" +
+			"  - string\n" +
+			"id: 10\n" +
+			"category:\n" +
+			"  id: 1\n" +
+			"  name: Dogs\n" +
+			"status: available\n" +
+			"tags:\n" +
+			"  - id: 0\n" +
+			"    name: name\n")
+		mocktest.TestRunMockTestWithPipeAndFlags(
+			t, pipeData, "pet", "update",
+			"--api-key", "string",
+		)
+	})
 }
 
 func TestPetDelete(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
-	mocktest.TestRunMockTestWithFlags(
-		t,
-		"pet", "delete",
-		"--api-key", "string",
-		"--pet-id", "0",
-	)
+	t.Run("regular flags", func(t *testing.T) {
+		mocktest.TestRunMockTestWithFlags(
+			t, "pet", "delete",
+			"--api-key", "string",
+			"--pet-id", "0",
+		)
+	})
 }
 
 func TestPetFindByStatus(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
-	mocktest.TestRunMockTestWithFlags(
-		t,
-		"pet", "find-by-status",
-		"--api-key", "string",
-		"--status", "available",
-	)
+	t.Run("regular flags", func(t *testing.T) {
+		mocktest.TestRunMockTestWithFlags(
+			t, "pet", "find-by-status",
+			"--api-key", "string",
+			"--status", "available",
+		)
+	})
 }
 
 func TestPetFindByTags(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
-	mocktest.TestRunMockTestWithFlags(
-		t,
-		"pet", "find-by-tags",
-		"--api-key", "string",
-		"--tag", "string",
-	)
+	t.Run("regular flags", func(t *testing.T) {
+		mocktest.TestRunMockTestWithFlags(
+			t, "pet", "find-by-tags",
+			"--api-key", "string",
+			"--tag", "string",
+		)
+	})
 }
 
 func TestPetUpdateWithForm(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
-	mocktest.TestRunMockTestWithFlags(
-		t,
-		"pet", "update-with-form",
-		"--api-key", "string",
-		"--pet-id", "0",
-		"--name", "name",
-		"--status", "status",
-	)
+	t.Run("regular flags", func(t *testing.T) {
+		mocktest.TestRunMockTestWithFlags(
+			t, "pet", "update-with-form",
+			"--api-key", "string",
+			"--pet-id", "0",
+			"--name", "name",
+			"--status", "status",
+		)
+	})
 }
 
 func TestPetUploadImage(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
-	mocktest.TestRunMockTestWithFlags(
-		t,
-		"pet", "upload-image",
-		"--api-key", "string",
-		"--pet-id", "0",
-		"--body", mocktest.TestFile(t, "..."),
-		"--additional-metadata", "additionalMetadata",
-	)
+	t.Run("regular flags", func(t *testing.T) {
+		mocktest.TestRunMockTestWithFlags(
+			t, "pet", "upload-image",
+			"--api-key", "string",
+			"--pet-id", "0",
+			"--body", mocktest.TestFile(t, "..."),
+			"--additional-metadata", "additionalMetadata",
+		)
+	})
+
+	t.Run("piping data", func(t *testing.T) {
+		// Test piping YAML data over stdin
+		pipeData := []byte("...")
+		mocktest.TestRunMockTestWithPipeAndFlags(
+			t, pipeData, "pet", "upload-image",
+			"--api-key", "string",
+			"--pet-id", "0",
+			"--additional-metadata", "additionalMetadata",
+		)
+	})
 }
