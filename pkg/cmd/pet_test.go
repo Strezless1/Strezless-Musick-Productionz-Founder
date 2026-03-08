@@ -183,14 +183,14 @@ func TestPetUploadImage(t *testing.T) {
 			t, "pet", "upload-image",
 			"--api-key", "string",
 			"--pet-id", "0",
-			"--body", mocktest.TestFile(t, "..."),
+			"--body", mocktest.TestFile(t, "Example data"),
 			"--additional-metadata", "additionalMetadata",
 		)
 	})
 
 	t.Run("piping data", func(t *testing.T) {
 		// Test piping YAML data over stdin
-		pipeData := []byte("...")
+		pipeData := []byte("Example data")
 		mocktest.TestRunMockTestWithPipeAndFlags(
 			t, pipeData, "pet", "upload-image",
 			"--api-key", "string",
