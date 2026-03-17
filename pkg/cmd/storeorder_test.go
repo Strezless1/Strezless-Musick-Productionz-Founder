@@ -12,8 +12,9 @@ func TestStoreOrderCreate(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
-			t, "store:order", "create",
+			t,
 			"--api-key", "string",
+			"store:order", "create",
 			"--id", "10",
 			"--complete=true",
 			"--pet-id", "198772",
@@ -33,8 +34,9 @@ func TestStoreOrderCreate(t *testing.T) {
 			"shipDate: '2019-12-27T18:11:19.117Z'\n" +
 			"status: approved\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
-			t, pipeData, "store:order", "create",
+			t, pipeData,
 			"--api-key", "string",
+			"store:order", "create",
 		)
 	})
 }
@@ -43,8 +45,9 @@ func TestStoreOrderRetrieve(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
-			t, "store:order", "retrieve",
+			t,
 			"--api-key", "string",
+			"store:order", "retrieve",
 			"--order-id", "0",
 		)
 	})
@@ -54,8 +57,9 @@ func TestStoreOrderDelete(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
-			t, "store:order", "delete",
+			t,
 			"--api-key", "string",
+			"store:order", "delete",
 			"--order-id", "0",
 		)
 	})
