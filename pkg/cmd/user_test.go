@@ -13,8 +13,9 @@ func TestUserCreate(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
-			t, "user", "create",
+			t,
 			"--api-key", "string",
+			"user", "create",
 			"--id", "10",
 			"--email", "john@email.com",
 			"--first-name", "John",
@@ -38,8 +39,9 @@ func TestUserCreate(t *testing.T) {
 			"username: theUser\n" +
 			"userStatus: 1\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
-			t, pipeData, "user", "create",
+			t, pipeData,
 			"--api-key", "string",
+			"user", "create",
 		)
 	})
 }
@@ -48,8 +50,9 @@ func TestUserRetrieve(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
-			t, "user", "retrieve",
+			t,
 			"--api-key", "string",
+			"user", "retrieve",
 			"--username", "username",
 		)
 	})
@@ -59,8 +62,9 @@ func TestUserUpdate(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
-			t, "user", "update",
+			t,
 			"--api-key", "string",
+			"user", "update",
 			"--existing-username", "username",
 			"--id", "10",
 			"--email", "john@email.com",
@@ -85,8 +89,9 @@ func TestUserUpdate(t *testing.T) {
 			"username: theUser\n" +
 			"userStatus: 1\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
-			t, pipeData, "user", "update",
+			t, pipeData,
 			"--api-key", "string",
+			"user", "update",
 			"--existing-username", "username",
 		)
 	})
@@ -96,8 +101,9 @@ func TestUserDelete(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
-			t, "user", "delete",
+			t,
 			"--api-key", "string",
+			"user", "delete",
 			"--username", "username",
 		)
 	})
@@ -107,8 +113,9 @@ func TestUserCreateWithList(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
-			t, "user", "create-with-list",
+			t,
 			"--api-key", "string",
+			"user", "create-with-list",
 			"--body", "{id: 10, email: john@email.com, firstName: John, lastName: James, password: '12345', phone: '12345', username: theUser, userStatus: 1}",
 		)
 	})
@@ -119,8 +126,9 @@ func TestUserCreateWithList(t *testing.T) {
 
 		// Alternative argument passing style using inner flags
 		mocktest.TestRunMockTestWithFlags(
-			t, "user", "create-with-list",
+			t,
 			"--api-key", "string",
+			"user", "create-with-list",
 			"--body.id", "10",
 			"--body.email", "john@email.com",
 			"--body.first-name", "John",
@@ -144,8 +152,9 @@ func TestUserCreateWithList(t *testing.T) {
 			"  username: theUser\n" +
 			"  userStatus: 1\n")
 		mocktest.TestRunMockTestWithPipeAndFlags(
-			t, pipeData, "user", "create-with-list",
+			t, pipeData,
 			"--api-key", "string",
+			"user", "create-with-list",
 		)
 	})
 }
@@ -154,8 +163,9 @@ func TestUserLogin(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
-			t, "user", "login",
+			t,
 			"--api-key", "string",
+			"user", "login",
 			"--password", "password",
 			"--username", "username",
 		)
@@ -166,8 +176,9 @@ func TestUserLogout(t *testing.T) {
 	t.Skip("Mock server tests are disabled")
 	t.Run("regular flags", func(t *testing.T) {
 		mocktest.TestRunMockTestWithFlags(
-			t, "user", "logout",
+			t,
 			"--api-key", "string",
+			"user", "logout",
 		)
 	})
 }
