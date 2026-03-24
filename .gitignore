@@ -1,4 +1,5 @@
 .prism.log
+.stdy.log
 dist/
 /strezless-musick-nexus-metadata
 *.exe
