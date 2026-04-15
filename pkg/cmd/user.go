@@ -242,8 +242,9 @@ func handleUserCreate(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "user create", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "user create", obj, format, explicitFormat, transform)
 }
 
 func handleUserRetrieve(ctx context.Context, cmd *cli.Command) error {
@@ -277,8 +278,9 @@ func handleUserRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "user retrieve", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "user retrieve", obj, format, explicitFormat, transform)
 }
 
 func handleUserUpdate(ctx context.Context, cmd *cli.Command) error {
@@ -368,8 +370,9 @@ func handleUserCreateWithList(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "user create-with-list", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "user create-with-list", obj, format, explicitFormat, transform)
 }
 
 func handleUserLogin(ctx context.Context, cmd *cli.Command) error {
@@ -402,8 +405,9 @@ func handleUserLogin(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "user login", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "user login", obj, format, explicitFormat, transform)
 }
 
 func handleUserLogout(ctx context.Context, cmd *cli.Command) error {

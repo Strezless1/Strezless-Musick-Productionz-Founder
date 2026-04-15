@@ -270,8 +270,9 @@ func handlePetCreate(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "pet create", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "pet create", obj, format, explicitFormat, transform)
 }
 
 func handlePetRetrieve(ctx context.Context, cmd *cli.Command) error {
@@ -305,8 +306,9 @@ func handlePetRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "pet retrieve", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "pet retrieve", obj, format, explicitFormat, transform)
 }
 
 func handlePetUpdate(ctx context.Context, cmd *cli.Command) error {
@@ -339,8 +341,9 @@ func handlePetUpdate(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "pet update", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "pet update", obj, format, explicitFormat, transform)
 }
 
 func handlePetDelete(ctx context.Context, cmd *cli.Command) error {
@@ -398,8 +401,9 @@ func handlePetFindByStatus(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "pet find-by-status", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "pet find-by-status", obj, format, explicitFormat, transform)
 }
 
 func handlePetFindByTags(ctx context.Context, cmd *cli.Command) error {
@@ -432,8 +436,9 @@ func handlePetFindByTags(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "pet find-by-tags", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "pet find-by-tags", obj, format, explicitFormat, transform)
 }
 
 func handlePetUpdateWithForm(ctx context.Context, cmd *cli.Command) error {
@@ -517,6 +522,7 @@ func handlePetUploadImage(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "pet upload-image", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "pet upload-image", obj, format, explicitFormat, transform)
 }
