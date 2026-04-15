@@ -108,8 +108,9 @@ func handleStoreOrderCreate(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "store:order create", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "store:order create", obj, format, explicitFormat, transform)
 }
 
 func handleStoreOrderRetrieve(ctx context.Context, cmd *cli.Command) error {
@@ -143,8 +144,9 @@ func handleStoreOrderRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "store:order retrieve", obj, format, transform)
+	return ShowJSON(os.Stdout, os.Stderr, "store:order retrieve", obj, format, explicitFormat, transform)
 }
 
 func handleStoreOrderDelete(ctx context.Context, cmd *cli.Command) error {
