@@ -5,7 +5,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/omar-orrantia/Strezless-Musick-Productionz-Founder/internal/apiquery"
 	"github.com/omar-orrantia/Strezless-Musick-Productionz-Founder/internal/requestflag"
@@ -110,7 +109,12 @@ func handleStoreOrderCreate(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, os.Stderr, "store:order create", obj, format, explicitFormat, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "store:order create",
+		Transform:      transform,
+	})
 }
 
 func handleStoreOrderRetrieve(ctx context.Context, cmd *cli.Command) error {
@@ -146,7 +150,12 @@ func handleStoreOrderRetrieve(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, os.Stderr, "store:order retrieve", obj, format, explicitFormat, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "store:order retrieve",
+		Transform:      transform,
+	})
 }
 
 func handleStoreOrderDelete(ctx context.Context, cmd *cli.Command) error {

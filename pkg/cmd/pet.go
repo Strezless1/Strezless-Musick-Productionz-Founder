@@ -272,7 +272,12 @@ func handlePetCreate(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, os.Stderr, "pet create", obj, format, explicitFormat, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "pet create",
+		Transform:      transform,
+	})
 }
 
 func handlePetRetrieve(ctx context.Context, cmd *cli.Command) error {
@@ -308,7 +313,12 @@ func handlePetRetrieve(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, os.Stderr, "pet retrieve", obj, format, explicitFormat, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "pet retrieve",
+		Transform:      transform,
+	})
 }
 
 func handlePetUpdate(ctx context.Context, cmd *cli.Command) error {
@@ -343,7 +353,12 @@ func handlePetUpdate(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, os.Stderr, "pet update", obj, format, explicitFormat, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "pet update",
+		Transform:      transform,
+	})
 }
 
 func handlePetDelete(ctx context.Context, cmd *cli.Command) error {
@@ -403,7 +418,12 @@ func handlePetFindByStatus(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, os.Stderr, "pet find-by-status", obj, format, explicitFormat, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "pet find-by-status",
+		Transform:      transform,
+	})
 }
 
 func handlePetFindByTags(ctx context.Context, cmd *cli.Command) error {
@@ -438,7 +458,12 @@ func handlePetFindByTags(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, os.Stderr, "pet find-by-tags", obj, format, explicitFormat, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "pet find-by-tags",
+		Transform:      transform,
+	})
 }
 
 func handlePetUpdateWithForm(ctx context.Context, cmd *cli.Command) error {
@@ -524,5 +549,10 @@ func handlePetUploadImage(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, os.Stderr, "pet upload-image", obj, format, explicitFormat, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "pet upload-image",
+		Transform:      transform,
+	})
 }
