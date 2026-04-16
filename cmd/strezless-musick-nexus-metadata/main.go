@@ -10,7 +10,7 @@ import (
 	"os"
 	"slices"
 
-	"github.com/stainless-sdks/strezless-musick-nexus-metadata-cli/pkg/cmd"
+	"github.com/omar-orrantia/Strezless-Musick-Productionz-Founder/pkg/cmd"
 	"github.com/stainless-sdks/strezless-musick-nexus-metadata-go"
 	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
@@ -21,6 +21,13 @@ func main() {
 
 	if slices.Contains(os.Args, "__complete") {
 		prepareForAutocomplete(app)
+	}
+
+	if baseURL, ok := os.LookupEnv("STREZLESS_MUSICK_NEXUS_METADATA_BASE_URL"); ok {
+		if err := cmd.ValidateBaseURL(baseURL, "STREZLESS_MUSICK_NEXUS_METADATA_BASE_URL"); err != nil {
+			fmt.Fprintf(os.Stderr, "%s\n", err.Error())
+			os.Exit(1)
+		}
 	}
 
 	if err := app.Run(context.Background(), os.Args); err != nil {
@@ -36,13 +43,22 @@ func main() {
 			fmt.Fprintf(os.Stderr, "%s %q: %d %s\n", apierr.Request.Method, apierr.Request.URL, apierr.Response.StatusCode, http.StatusText(apierr.Response.StatusCode))
 			format := app.String("format-error")
 			json := gjson.Parse(apierr.RawJSON())
-			show_err := cmd.ShowJSON(os.Stdout, "Error", json, format, app.String("transform-error"))
+			show_err := cmd.ShowJSON(json, cmd.ShowJSONOpts{
+				ExplicitFormat: app.IsSet("format-error"),
+				Format:         format,
+				Title:          "Error",
+				Transform:      app.String("transform-error"),
+			})
 			if show_err != nil {
 				// Just print the original error:
 				fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 			}
 		} else {
-			fmt.Fprintf(os.Stderr, "%s\n", err.Error())
+			if cmd.CommandErrorBuffer.Len() > 0 {
+				os.Stderr.Write(cmd.CommandErrorBuffer.Bytes())
+			} else {
+				fmt.Fprintf(os.Stderr, "%s\n", err.Error())
+			}
 		}
 		os.Exit(exitCode)
 	}

@@ -1,6 +1,7 @@
 package mocktest
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"net"
@@ -55,8 +56,14 @@ func restoreNetwork(origClient, origDefault http.RoundTripper) {
 }
 
 // TestRunMockTestWithFlags runs a test against a mock server with the provided
-// CLI flags and ensures it succeeds
-func TestRunMockTestWithFlags(t *testing.T, flags ...string) {
+// CLI args and ensures it succeeds
+func TestRunMockTestWithFlags(t *testing.T, args ...string) {
+	TestRunMockTestWithPipeAndFlags(t, nil, args...)
+}
+
+// TestRunMockTestWithPipeAndFlags runs a test against a mock server with the provided
+// data piped over stdin and CLI args and ensures it succeeds
+func TestRunMockTestWithPipeAndFlags(t *testing.T, pipeData []byte, args ...string) {
 	origClient, origDefault := blockNetworkExceptMockServer()
 	defer restoreNetwork(origClient, origDefault)
 
@@ -72,20 +79,18 @@ func TestRunMockTestWithFlags(t *testing.T, flags ...string) {
 	_, filename, _, ok := runtime.Caller(0)
 	require.True(t, ok, "Could not get current file path")
 	dirPath := filepath.Dir(filename)
-	project := filepath.Join(dirPath, "..", "..", "cmd", "...")
+	project := filepath.Join(dirPath, "..", "..", "cmd", "strezless-musick-nexus-metadata")
 
-	args := []string{"run", project, "--base-url", mockServerURL.String()}
-	args = append(args, flags...)
+	args = append([]string{"run", project, "--base-url", mockServerURL.String()}, args...)
 
-	t.Logf("Testing command: strezless-musick-nexus-metadata %s", strings.Join(args[4:], " "))
+	t.Logf("Testing command: go run ./cmd/strezless-musick-nexus-metadata %s", strings.Join(args[2:], " "))
 
 	cmd := exec.Command("go", args...)
+	cmd.Stdin = bytes.NewReader(pipeData)
 	output, err := cmd.CombinedOutput()
-	if err != nil {
-		assert.Fail(t, "Test failed", "Error: %v\nOutput: %s", err, output)
-	}
+	assert.NoError(t, err, "Test failed\nError: %v\nOutput: %s", err, output)
 
-	t.Logf("Test passed successfully with output:\n%s\n", output)
+	t.Logf("Test passed successfully\nOutput:\n%s", string(output))
 }
 
 func TestFile(t *testing.T, contents string) string {

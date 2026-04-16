@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/goccy/go-yaml"
 	"github.com/urfave/cli/v3"
@@ -19,21 +20,37 @@ type Flag[
 		[]float64 | []int64 | []bool | any | map[string]any | DateTimeValue | DateValue | TimeValue |
 		string | float64 | int64 | bool,
 ] struct {
-	Name        string        // name of the flag
-	Category    string        // category of the flag, if any
-	DefaultText string        // default text of the flag for usage purposes
-	HideDefault bool          // whether to hide the default value in output
-	Usage       string        // usage string for help output
-	Required    bool          // whether the flag is required or not
-	Hidden      bool          // whether to hide the flag in help output
-	Default     T             // default value for this flag if not set by from any source
-	Aliases     []string      // aliases that are allowed for this flag
-	Validator   func(T) error // custom function to validate this flag value
+	Name        string               // name of the flag
+	Category    string               // category of the flag, if any
+	DefaultText string               // default text of the flag for usage purposes
+	HideDefault bool                 // whether to hide the default value in output
+	Usage       string               // usage string for help output
+	Sources     cli.ValueSourceChain // sources to load flag value from
+	Required    bool                 // whether the flag is required or not
+	Hidden      bool                 // whether to hide the flag in help output
+	Default     T                    // default value for this flag if not set by from any source
+	Aliases     []string             // aliases that are allowed for this flag
+	Validator   func(T) error        // custom function to validate this flag value
 
 	QueryPath  string // location in the request query string to put this flag's value
 	HeaderPath string // location in the request header to put this flag's value
 	BodyPath   string // location in the request body to put this flag's value
 	BodyRoot   bool   // if true, then use this value as the entire request body
+
+	// Const, when true, marks this flag as a constant. The flag's Default value is used as the fixed value
+	// and always included in the request (IsSet returns true). The user can still see and override the flag,
+	// but isn't required to provide it. This is used for single-value enums and `x-stainless-const`
+	// parameters.
+	Const bool
+
+	// FileInput, when true, indicates that the flag value is always treated as a file path. The file is read
+	// automatically without requiring the "@" prefix. This is used for parameters with `type: string, format:
+	// binary` in the OpenAPI spec.
+	FileInput bool
+
+	// DataAliases is a list of alternate names for this parameter recognized when parsing piped YAML/JSON
+	// input. Values keyed by any alias are translated to the canonical API name before being sent.
+	DataAliases []string
 
 	// unexported fields for internal use
 	count      int       // number of times the flag has been set
@@ -51,6 +68,8 @@ type InRequest interface {
 	GetHeaderPath() string
 	GetBodyPath() string
 	IsBodyRoot() bool
+	IsFileInput() bool
+	GetDataAliases() []string
 }
 
 func (f Flag[T]) GetQueryPath() string {
@@ -67,6 +86,14 @@ func (f Flag[T]) GetBodyPath() string {
 
 func (f Flag[T]) IsBodyRoot() bool {
 	return f.BodyRoot
+}
+
+func (f Flag[T]) IsFileInput() bool {
+	return f.FileInput
+}
+
+func (f Flag[T]) GetDataAliases() []string {
+	return f.DataAliases
 }
 
 // The values that will be sent in different parts of a request.
@@ -108,6 +135,40 @@ func ExtractRequestContents(cmd *cli.Command) RequestContents {
 	return res
 }
 
+func GetMissingRequiredFlags(cmd *cli.Command, body any) []cli.Flag {
+	missing := []cli.Flag{}
+	for _, flag := range cmd.Flags {
+		if flag.IsSet() {
+			continue
+		}
+
+		if required, ok := flag.(cli.RequiredFlag); ok && required.IsRequired() {
+			missing = append(missing, flag)
+			continue
+		}
+
+		if r, ok := flag.(RequiredFlagOrStdin); !ok || !r.IsRequiredAsFlagOrStdin() {
+			continue
+		}
+
+		if toSend, ok := flag.(InRequest); ok {
+			if toSend.IsBodyRoot() {
+				if body != nil {
+					continue
+				}
+			} else if bodyPath := toSend.GetBodyPath(); bodyPath != "" {
+				if bodyMap, ok := body.(map[string]any); ok {
+					if _, found := bodyMap[bodyPath]; found {
+						continue
+					}
+				}
+			}
+		}
+		missing = append(missing, flag)
+	}
+	return missing
+}
+
 // Implementation of the cli.Flag interface
 var _ cli.Flag = (*Flag[any])(nil) // Type assertion to ensure interface compliance
 
@@ -126,6 +187,22 @@ func (f *Flag[T]) PreParse() error {
 }
 
 func (f *Flag[T]) PostParse() error {
+	if !f.hasBeenSet {
+		if val, source, found := f.Sources.LookupWithSource(); found {
+			if val != "" || reflect.TypeOf(f.value).Kind() == reflect.String {
+				if err := f.Set(f.Name, val); err != nil {
+					return fmt.Errorf(
+						"could not parse %[1]q as %[2]T value from %[3]s for flag %[4]s: %[5]s",
+						val, f.value, source, f.Name, err,
+					)
+				}
+			} else if val == "" && reflect.TypeOf(f.value).Kind() == reflect.Bool {
+				_ = f.Set(f.Name, "false")
+			}
+
+			f.hasBeenSet = true
+		}
+	}
 	return nil
 }
 
@@ -177,7 +254,7 @@ func (f *Flag[T]) String() string {
 }
 
 func (f *Flag[T]) IsSet() bool {
-	return f.hasBeenSet
+	return f.hasBeenSet || f.Const
 }
 
 func (f *Flag[T]) Names() []string {
@@ -203,6 +280,27 @@ func (f *Flag[T]) SetCategory(c string) {
 var _ cli.RequiredFlag = (*Flag[any])(nil) // Type assertion to ensure interface compliance
 
 func (f *Flag[T]) IsRequired() bool {
+	// Const flags are always auto-set, so never required from the user.
+	if f.Const {
+		return false
+	}
+	// Intentionally don't use `f.Required`, because request flags may be passed
+	// over stdin as well as by flag.
+	if f.BodyPath != "" || f.BodyRoot {
+		return false
+	}
+	return f.Required
+}
+
+type RequiredFlagOrStdin interface {
+	IsRequiredAsFlagOrStdin() bool
+}
+
+func (f *Flag[T]) IsRequiredAsFlagOrStdin() bool {
+	// Const flags are always auto-set, so never required from the user.
+	if f.Const {
+		return false
+	}
 	return f.Required
 }
 
@@ -229,8 +327,9 @@ func (f *Flag[T]) GetDefaultText() string {
 	return f.DefaultText
 }
 
+// GetEnvVars returns the env vars for this flag
 func (f *Flag[T]) GetEnvVars() []string {
-	return nil
+	return f.Sources.EnvKeys()
 }
 
 func (f *Flag[T]) IsDefaultVisible() bool {
@@ -308,6 +407,14 @@ func (f *Flag[T]) Count() int {
 	return f.count
 }
 
+// Implementation for the cli.LocalFlag interface
+var _ cli.LocalFlag = (*Flag[any])(nil) // Type assertion to ensure interface compliance
+
+func (f Flag[T]) IsLocal() bool {
+	// By default, all request flags are local, i.e. can be provided at any part of the CLI command.
+	return true
+}
+
 // cliValue is a generic implementation of cli.Value for common types
 type cliValue[
 	T []any | []map[string]any | []DateTimeValue | []DateValue | []TimeValue | []string | []float64 |
@@ -359,12 +466,21 @@ func parseCLIArg[
 		}
 
 	default:
-		var yamlValue T
-		err = yaml.Unmarshal([]byte(value), &yamlValue)
-		if err != nil {
-			err = fmt.Errorf("failed to parse as YAML: %w", err)
+		if strings.HasPrefix(value, "@") {
+			// File literals like @file.txt should work here
+			parsedValue = value
+		} else {
+			var yamlValue T
+			err = yaml.Unmarshal([]byte(value), &yamlValue)
+			if err == nil {
+				parsedValue = yamlValue
+			} else if allowAsLiteralString(value) {
+				parsedValue = value
+			} else {
+				parsedValue = nil
+				err = fmt.Errorf("failed to parse as YAML: %w", err)
+			}
 		}
-		parsedValue = yamlValue
 	}
 
 	// Nil needs to be handled specially because unmarshalling a YAML `null`
@@ -383,6 +499,21 @@ func parseCLIArg[
 	}
 	return empty, err
 
+}
+
+// Assuming this string failed to parse as valid YAML, this function will
+// return true for strings that can reasonably be interpreted as a string literal,
+// like identifiers (`foo_bar`), UUIDs (`945b2f0c-8e89-487a-b02c-f851c69ea459`),
+// base64 (`aGVsbG8=`), and qualified identifiers (`color.Red`). This should
+// not include strings that look like mistyped YAML (e.g. `{key:`)
+func allowAsLiteralString(s string) bool {
+	for _, c := range s {
+		if !unicode.IsLetter(c) && !unicode.IsDigit(c) &&
+			c != '_' && c != '-' && c != '.' && c != '=' {
+			return false
+		}
+	}
+	return true
 }
 
 // Parse the input string and set result as the cliValue's value

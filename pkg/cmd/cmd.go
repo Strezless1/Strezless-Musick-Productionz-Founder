@@ -3,6 +3,7 @@
 package cmd
 
 import (
+	"bytes"
 	"compress/gzip"
 	"context"
 	"fmt"
@@ -11,21 +12,24 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/stainless-sdks/strezless-musick-nexus-metadata-cli/internal/autocomplete"
+	"github.com/omar-orrantia/Strezless-Musick-Productionz-Founder/internal/autocomplete"
+	"github.com/omar-orrantia/Strezless-Musick-Productionz-Founder/internal/requestflag"
 	docs "github.com/urfave/cli-docs/v3"
 	"github.com/urfave/cli/v3"
 )
 
 var (
-	Command *cli.Command
+	Command            *cli.Command
+	CommandErrorBuffer bytes.Buffer
 )
 
 func init() {
 	Command = &cli.Command{
-		Name:    "strezless-musick-nexus-metadata",
-		Usage:   "CLI for the strezless-musick-nexus-metadata API",
-		Suggest: true,
-		Version: Version,
+		Name:      "strezless-musick-nexus-metadata",
+		Usage:     "CLI for the strezless-musick-nexus-metadata API",
+		Suggest:   true,
+		Version:   Version,
+		ErrWriter: &CommandErrorBuffer,
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
 				Name:  "debug",
@@ -35,6 +39,9 @@ func init() {
 				Name:        "base-url",
 				DefaultText: "url",
 				Usage:       "Override the base URL for API requests",
+				Validator: func(baseURL string) error {
+					return ValidateBaseURL(baseURL, "--base-url")
+				},
 			},
 			&cli.StringFlag{
 				Name:  "format",
@@ -65,6 +72,10 @@ func init() {
 			&cli.StringFlag{
 				Name:  "transform-error",
 				Usage: "The GJSON transformation for errors.",
+			},
+			&requestflag.Flag[string]{
+				Name:    "api-key",
+				Sources: cli.EnvVars("STREZLESS_MUSICK_NEXUS_METADATA_API_KEY"),
 			},
 		},
 		Commands: []*cli.Command{

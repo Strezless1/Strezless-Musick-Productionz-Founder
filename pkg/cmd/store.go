@@ -5,9 +5,8 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 
-	"github.com/stainless-sdks/strezless-musick-nexus-metadata-cli/internal/apiquery"
+	"github.com/omar-orrantia/Strezless-Musick-Productionz-Founder/internal/apiquery"
 	"github.com/stainless-sdks/strezless-musick-nexus-metadata-go"
 	"github.com/stainless-sdks/strezless-musick-nexus-metadata-go/option"
 	"github.com/tidwall/gjson"
@@ -51,6 +50,12 @@ func handleStoreListInventory(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "store list-inventory", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "store list-inventory",
+		Transform:      transform,
+	})
 }

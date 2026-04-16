@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
@@ -15,10 +14,10 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/stainless-sdks/strezless-musick-nexus-metadata-cli/internal/apiform"
-	"github.com/stainless-sdks/strezless-musick-nexus-metadata-cli/internal/apiquery"
-	"github.com/stainless-sdks/strezless-musick-nexus-metadata-cli/internal/debugmiddleware"
-	"github.com/stainless-sdks/strezless-musick-nexus-metadata-cli/internal/requestflag"
+	"github.com/omar-orrantia/Strezless-Musick-Productionz-Founder/internal/apiform"
+	"github.com/omar-orrantia/Strezless-Musick-Productionz-Founder/internal/apiquery"
+	"github.com/omar-orrantia/Strezless-Musick-Productionz-Founder/internal/debugmiddleware"
+	"github.com/omar-orrantia/Strezless-Musick-Productionz-Founder/internal/requestflag"
 	"github.com/stainless-sdks/strezless-musick-nexus-metadata-go/option"
 
 	"github.com/goccy/go-yaml"
@@ -41,9 +40,48 @@ const (
 	EmbedIOReader
 )
 
-func embedFiles(obj any, embedStyle FileEmbedStyle) (any, error) {
+// onceStdinReader wraps an io.Reader that can only be consumed once, used to ensure stdin is read by at most
+// one parameter (or only for a body root parameter or only for YAML parameter input). If reason is set, stdin
+// is unavailable and read() returns an error explaining why.
+type onceStdinReader struct {
+	stdinReader   io.Reader
+	failureReason string
+}
+
+func (o *onceStdinReader) read() (io.Reader, error) {
+	if o.failureReason != "" {
+		return nil, fmt.Errorf("cannot read from stdin: %s", o.failureReason)
+	}
+	if o.stdinReader == nil {
+		return nil, fmt.Errorf("stdin has already been read by another parameter; it can only be read once")
+	}
+	r := o.stdinReader
+	o.stdinReader = nil
+	return r, nil
+}
+
+func (o *onceStdinReader) readAll() ([]byte, error) {
+	r, err := o.read()
+	if err != nil {
+		return nil, err
+	}
+	return io.ReadAll(r)
+}
+
+func isStdinPath(s string) bool {
+	switch s {
+	case "-", "/dev/fd/0", "/dev/stdin":
+		return true
+	}
+	return false
+}
+
+func embedFiles(obj any, embedStyle FileEmbedStyle, stdin *onceStdinReader) (any, error) {
+	if obj == nil {
+		return obj, nil
+	}
 	v := reflect.ValueOf(obj)
-	result, err := embedFilesValue(v, embedStyle)
+	result, err := embedFilesValue(v, embedStyle, stdin)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +89,7 @@ func embedFiles(obj any, embedStyle FileEmbedStyle) (any, error) {
 }
 
 // Replace "@file.txt" with the file's contents inside a value
-func embedFilesValue(v reflect.Value, embedStyle FileEmbedStyle) (reflect.Value, error) {
+func embedFilesValue(v reflect.Value, embedStyle FileEmbedStyle, stdin *onceStdinReader) (reflect.Value, error) {
 	// Unwrap interface values to get the concrete type
 	if v.Kind() == reflect.Interface {
 		if v.IsNil() {
@@ -72,7 +110,7 @@ func embedFilesValue(v reflect.Value, embedStyle FileEmbedStyle) (reflect.Value,
 		for iter.Next() {
 			key := iter.Key()
 			val := iter.Value()
-			newVal, err := embedFilesValue(val, embedStyle)
+			newVal, err := embedFilesValue(val, embedStyle, stdin)
 			if err != nil {
 				return reflect.Value{}, err
 			}
@@ -87,7 +125,7 @@ func embedFilesValue(v reflect.Value, embedStyle FileEmbedStyle) (reflect.Value,
 		// Use `[]any` to allow for types to change when embedding files
 		result := reflect.MakeSlice(reflect.TypeOf([]any{}), v.Len(), v.Len())
 		for i := 0; i < v.Len(); i++ {
-			newVal, err := embedFilesValue(v.Index(i), embedStyle)
+			newVal, err := embedFilesValue(v.Index(i), embedStyle, stdin)
 			if err != nil {
 				return reflect.Value{}, err
 			}
@@ -96,6 +134,28 @@ func embedFilesValue(v reflect.Value, embedStyle FileEmbedStyle) (reflect.Value,
 		return result, nil
 
 	case reflect.String:
+		// FilePathValue is always treated as a file path without needing the "@" prefix.
+		// These only appear on binary upload parameters (multipart/octet-stream), which
+		// always use EmbedIOReader.
+		if v.Type() == reflect.TypeOf(FilePathValue("")) {
+			s := v.String()
+			if s == "" {
+				return v, nil
+			}
+			if isStdinPath(s) {
+				content, err := stdin.readAll()
+				if err != nil {
+					return v, err
+				}
+				return reflect.ValueOf(string(content)), nil
+			}
+			content, err := os.ReadFile(s)
+			if err != nil {
+				return v, err
+			}
+			return reflect.ValueOf(string(content)), nil
+		}
+
 		s := v.String()
 		if literal, ok := strings.CutPrefix(s, "\\@"); ok {
 			// Allow for escaped @ signs if you don't want them to be treated as files
@@ -106,6 +166,13 @@ func embedFilesValue(v reflect.Value, embedStyle FileEmbedStyle) (reflect.Value,
 			if filename, ok := strings.CutPrefix(s, "@data://"); ok {
 				// The "@data://" prefix is for files you explicitly want to upload
 				// as base64-encoded (even if the file itself is plain text)
+				if isStdinPath(filename) {
+					content, err := stdin.readAll()
+					if err != nil {
+						return v, err
+					}
+					return reflect.ValueOf(base64.StdEncoding.EncodeToString(content)), nil
+				}
 				content, err := os.ReadFile(filename)
 				if err != nil {
 					return v, err
@@ -115,12 +182,29 @@ func embedFilesValue(v reflect.Value, embedStyle FileEmbedStyle) (reflect.Value,
 				// The "@file://" prefix is for files that you explicitly want to
 				// upload as a string literal with backslash escapes (not base64
 				// encoded)
+				if isStdinPath(filename) {
+					content, err := stdin.readAll()
+					if err != nil {
+						return v, err
+					}
+					return reflect.ValueOf(string(content)), nil
+				}
 				content, err := os.ReadFile(filename)
 				if err != nil {
 					return v, err
 				}
 				return reflect.ValueOf(string(content)), nil
 			} else if filename, ok := strings.CutPrefix(s, "@"); ok {
+				if isStdinPath(filename) {
+					content, err := stdin.readAll()
+					if err != nil {
+						return v, err
+					}
+					if isUTF8TextFile(content) {
+						return reflect.ValueOf(string(content)), nil
+					}
+					return reflect.ValueOf(base64.StdEncoding.EncodeToString(content)), nil
+				}
 				content, err := os.ReadFile(filename)
 				if err != nil {
 					// If the string is "@username", it's probably supposed to be a
@@ -158,6 +242,14 @@ func embedFilesValue(v reflect.Value, embedStyle FileEmbedStyle) (reflect.Value,
 					expectsFile = strings.Contains(filename, ".") || strings.Contains(filename, "/")
 				}
 
+				if isStdinPath(filename) {
+					r, err := stdin.read()
+					if err != nil {
+						return v, err
+					}
+					return reflect.ValueOf(io.NopCloser(r)), nil
+				}
+
 				file, err := os.Open(filename)
 				if err != nil {
 					if !expectsFile {
@@ -166,8 +258,7 @@ func embedFilesValue(v reflect.Value, embedStyle FileEmbedStyle) (reflect.Value,
 					}
 					return v, err
 				}
-				reader := bufio.NewReader(file)
-				return reflect.ValueOf(reader), nil
+				return reflect.ValueOf(file), nil
 			}
 		}
 		return v, nil
@@ -209,37 +300,77 @@ func flagOptions(
 
 	// This parameter is true if stdin is already in use to pass a binary parameter by using the special value
 	// "-". In this case, we won't attempt to read it as a JSON/YAML blob for options setting.
-	stdinInUse bool,
+	ignoreStdin bool,
 ) ([]option.RequestOption, error) {
 	var options []option.RequestOption
 	if cmd.Bool("debug") {
 		options = append(options, option.WithMiddleware(debugmiddleware.NewRequestLogger().Middleware()))
 	}
 
-	flagContents := requestflag.ExtractRequestContents(cmd)
+	requestContents := requestflag.ExtractRequestContents(cmd)
 
-	var bodyData any
-	if isInputPiped() && !stdinInUse {
-		var err error
+	// Translate inner-field aliases in YAML values that came from flags (e.g.
+	// `--parent '{"alias": val}'` resolving to the canonical inner field).
+	if bodyMap, ok := requestContents.Body.(map[string]any); ok {
+		applyDataAliases(cmd, bodyMap)
+	}
+
+	stdinConsumedByPipe := false
+	if (bodyType == MultipartFormEncoded || bodyType == ApplicationJSON) && !ignoreStdin && isInputPiped() {
 		pipeData, err := io.ReadAll(os.Stdin)
 		if err != nil {
 			return nil, err
 		}
 
-		if err := yaml.Unmarshal(pipeData, &bodyData); err == nil {
+		if len(pipeData) > 0 {
+			stdinConsumedByPipe = true
+			var bodyData any
+			if err := yaml.Unmarshal(pipeData, &bodyData); err != nil {
+				return nil, fmt.Errorf("Failed to parse piped data as YAML/JSON:\n%w", err)
+			}
 			if bodyMap, ok := bodyData.(map[string]any); ok {
-				if flagMap, ok := flagContents.Body.(map[string]any); ok {
+				applyDataAliases(cmd, bodyMap)
+				if flagMap, ok := requestContents.Body.(map[string]any); ok {
 					maps.Copy(bodyMap, flagMap)
+					requestContents.Body = bodyMap
 				} else {
-					bodyData = flagContents.Body
+					bodyData = requestContents.Body
 				}
-			} else if flagMap, ok := flagContents.Body.(map[string]any); ok && len(flagMap) > 0 {
+			} else if flagMap, ok := requestContents.Body.(map[string]any); ok && len(flagMap) > 0 {
 				return nil, fmt.Errorf("Cannot merge flags with a body that is not a map: %v", bodyData)
+			} else {
+				requestContents.Body = bodyData
 			}
 		}
+	}
+
+	if missingFlags := requestflag.GetMissingRequiredFlags(cmd, requestContents.Body); len(missingFlags) > 0 {
+		if len(missingFlags) == 1 {
+			return nil, fmt.Errorf("Required flag %q not set\nRun '%s --help' for usage information", missingFlags[0].Names()[0], cmd.FullName())
+
+		} else {
+			names := []string{}
+			for _, flag := range missingFlags {
+				names = append(names, flag.Names()[0])
+			}
+			return nil, fmt.Errorf("Required flags %q not set\nRun '%s --help' for usage information", strings.Join(names, ", "), cmd.FullName())
+		}
+	}
+
+	// For flags marked as FileInput (type: string, format: binary), the value is always
+	// a file path. Wrap with FilePathValue so embedFiles reads the file automatically
+	// without requiring the user to type the "@" prefix. This handles both values set
+	// via explicit CLI flags and values that arrived via piped YAML/JSON data.
+	wrapFileInputValues(cmd, &requestContents)
+
+	// Determine stdin availability for FileInput params that use "-".
+	var stdinReader onceStdinReader
+	if ignoreStdin {
+		stdinReader = onceStdinReader{failureReason: "stdin is already being used for the request body"}
+	} else if stdinConsumedByPipe {
+		stdinReader = onceStdinReader{failureReason: "stdin was already consumed by piped YAML/JSON input"}
 	} else {
-		// No piped input, just use body flag values as a map
-		bodyData = flagContents.Body
+		stdinReader = onceStdinReader{stdinReader: os.Stdin}
 	}
 
 	// Embed files passed as "@file.jpg" in the request body, headers, and query:
@@ -247,19 +378,22 @@ func flagOptions(
 	if bodyType == ApplicationOctetStream || bodyType == MultipartFormEncoded {
 		embedStyle = EmbedIOReader
 	}
-	bodyData, err := embedFiles(bodyData, embedStyle)
-	if err != nil {
-		return nil, err
-	}
-	if headersWithFiles, err := embedFiles(flagContents.Headers, EmbedText); err != nil {
+
+	if embedded, err := embedFiles(requestContents.Body, embedStyle, &stdinReader); err != nil {
 		return nil, err
 	} else {
-		flagContents.Headers = headersWithFiles.(map[string]any)
+		requestContents.Body = embedded
 	}
-	if queriesWithFiles, err := embedFiles(flagContents.Queries, EmbedText); err != nil {
+
+	if headersWithFiles, err := embedFiles(requestContents.Headers, EmbedText, &stdinReader); err != nil {
 		return nil, err
 	} else {
-		flagContents.Queries = queriesWithFiles.(map[string]any)
+		requestContents.Headers = headersWithFiles.(map[string]any)
+	}
+	if queriesWithFiles, err := embedFiles(requestContents.Queries, EmbedText, &stdinReader); err != nil {
+		return nil, err
+	} else {
+		requestContents.Queries = queriesWithFiles.(map[string]any)
 	}
 
 	querySettings := apiquery.QuerySettings{
@@ -268,7 +402,7 @@ func flagOptions(
 	}
 
 	// Add query parameters:
-	if values, err := apiquery.MarshalWithSettings(flagContents.Queries, querySettings); err != nil {
+	if values, err := apiquery.MarshalWithSettings(requestContents.Queries, querySettings); err != nil {
 		return nil, err
 	} else {
 		for k, vs := range values {
@@ -284,7 +418,11 @@ func flagOptions(
 	}
 
 	// Add header parameters
-	if values, err := apiquery.MarshalWithSettings(flagContents.Headers, querySettings); err != nil {
+	headerSettings := apiquery.QuerySettings{
+		NestedFormat: apiquery.NestedQueryFormatDots,
+		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
+	}
+	if values, err := apiquery.MarshalWithSettings(requestContents.Headers, headerSettings); err != nil {
 		return nil, err
 	} else {
 		for k, vs := range values {
@@ -307,9 +445,9 @@ func flagOptions(
 		writer := multipart.NewWriter(buf)
 
 		// For multipart/form-encoded, we need a map structure
-		bodyMap, ok := bodyData.(map[string]any)
+		bodyMap, ok := requestContents.Body.(map[string]any)
 		if !ok {
-			return nil, fmt.Errorf("Cannot send a non-map value to a form-encoded endpoint: %v\n", bodyData)
+			return nil, fmt.Errorf("Cannot send a non-map value to a form-encoded endpoint: %v\n", requestContents.Body)
 		}
 		encodingFormat := apiform.FormatComma
 		if err := apiform.MarshalWithSettings(bodyMap, writer, encodingFormat); err != nil {
@@ -321,19 +459,25 @@ func flagOptions(
 		options = append(options, option.WithRequestBody(writer.FormDataContentType(), buf))
 
 	case ApplicationJSON:
-		bodyBytes, err := json.Marshal(bodyData)
+		bodyBytes, err := json.Marshal(requestContents.Body)
 		if err != nil {
 			return nil, err
 		}
 		options = append(options, option.WithRequestBody("application/json", bodyBytes))
 
 	case ApplicationOctetStream:
-		if bodyBytes, ok := bodyData.([]byte); ok {
+		// If there is a body root parameter, that will handle setting the request body, we don't need to do it here.
+		for _, flag := range cmd.Flags {
+			if toSend, ok := flag.(requestflag.InRequest); ok && toSend.IsBodyRoot() {
+				return options, nil
+			}
+		}
+		if bodyBytes, ok := requestContents.Body.([]byte); ok {
 			options = append(options, option.WithRequestBody("application/octet-stream", bodyBytes))
-		} else if bodyStr, ok := bodyData.(string); ok {
+		} else if bodyStr, ok := requestContents.Body.(string); ok {
 			options = append(options, option.WithRequestBody("application/octet-stream", []byte(bodyStr)))
 		} else {
-			return nil, fmt.Errorf("Unsupported body for application/octet-stream: %v", bodyData)
+			return nil, fmt.Errorf("Unsupported body for application/octet-stream: %v", requestContents.Body)
 		}
 
 	default:
@@ -341,4 +485,119 @@ func flagOptions(
 	}
 
 	return options, nil
+}
+
+// FilePathValue is a string wrapper that marks a value as a file path whose contents should be read
+// and embedded in the request. Unlike a regular string, embedFilesValue always treats a FilePathValue
+// as a file path without needing the "@" prefix.
+type FilePathValue string
+
+// applyDataAliases rewrites keys in a body map based on flag `DataAliases` metadata. For top-level flags,
+// `{alias: value}` becomes `{canonical: value}`. For inner flags (those registered under an outer flag
+// via WithInnerFlags), the alias translation is also applied to the nested map under the outer flag's
+// body path, so values like `--parent '{"alias": val}'` resolve to the canonical inner field name.
+func applyDataAliases(cmd *cli.Command, bodyMap map[string]any) {
+	for _, flag := range cmd.Flags {
+		// Inner flags: rewrite aliases inside the nested map under the outer flag's body path.
+		if inner, ok := flag.(requestflag.HasOuterFlag); ok {
+			outer, outerOk := inner.GetOuterFlag().(requestflag.InRequest)
+			if !outerOk {
+				continue
+			}
+			if nested, ok := bodyMap[outer.GetBodyPath()].(map[string]any); ok && inner.GetInnerField() != "" {
+				rewriteAliases(nested, inner.GetInnerField(), inner.GetDataAliases())
+			}
+			continue
+		}
+		// Top-level flags: rewrite aliases in the body map.
+		if inReq, ok := flag.(requestflag.InRequest); ok && inReq.GetBodyPath() != "" {
+			rewriteAliases(bodyMap, inReq.GetBodyPath(), inReq.GetDataAliases())
+		}
+	}
+}
+
+// rewriteAliases replaces each alias key in m with the canonical key, preserving the value. The
+// "canonical" key is the name the API itself expects (the OpenAPI property/field name) — e.g. for
+// a top-level flag, the parameter's BodyPath; for an inner flag, the inner field name. Aliases are
+// the user-facing alternate names declared via x-stainless-cli-data-alias.
+func rewriteAliases(m map[string]any, canonical string, aliases []string) {
+	for _, alias := range aliases {
+		if alias == "" || alias == canonical {
+			continue
+		}
+		if val, exists := m[alias]; exists {
+			m[canonical] = val
+			delete(m, alias)
+		}
+	}
+}
+
+// wrapFileInputValues replaces string values for FileInput flags (type: string, format: binary) with
+// FilePathValue sentinel values. embedFilesValue recognizes FilePathValue and reads the file contents
+// directly, so the user doesn't need to type the "@" prefix. This handles both values set via explicit
+// CLI flags and values that arrived via piped YAML/JSON data.
+func wrapFileInputValues(cmd *cli.Command, contents *requestflag.RequestContents) {
+	bodyMap, _ := contents.Body.(map[string]any)
+
+	for _, flag := range cmd.Flags {
+		inReq, ok := flag.(requestflag.InRequest)
+		if !ok || !inReq.IsFileInput() || inReq.IsBodyRoot() {
+			continue
+		}
+
+		// Wrap values set via explicit CLI flags.
+		if flag.IsSet() {
+			if wrapped, changed := wrapFileInputValue(flag.Get()); changed {
+				if bodyPath := inReq.GetBodyPath(); bodyPath != "" {
+					if bodyMap != nil {
+						bodyMap[bodyPath] = wrapped
+					}
+				} else if queryPath := inReq.GetQueryPath(); queryPath != "" {
+					contents.Queries[queryPath] = wrapped
+				} else if headerPath := inReq.GetHeaderPath(); headerPath != "" {
+					contents.Headers[headerPath] = wrapped
+				}
+			}
+		}
+
+		// Wrap values that arrived via piped YAML/JSON data in the body map.
+		if bodyPath := inReq.GetBodyPath(); bodyPath != "" && bodyMap != nil {
+			if value, exists := bodyMap[bodyPath]; exists {
+				if wrapped, changed := wrapFileInputValue(value); changed {
+					bodyMap[bodyPath] = wrapped
+				}
+			}
+		}
+	}
+}
+
+func wrapFileInputValue(value any) (any, bool) {
+	switch v := value.(type) {
+	case string:
+		if v == "" {
+			return value, false
+		}
+		return FilePathValue(v), true
+
+	case []string:
+		result := make([]any, len(v))
+		for i, s := range v {
+			result[i] = FilePathValue(s)
+		}
+		return result, true
+
+	case []any:
+		result := make([]any, len(v))
+		for i, elem := range v {
+			if s, ok := elem.(string); ok {
+				result[i] = FilePathValue(s)
+			} else {
+				result[i] = elem
+			}
+		}
+		return result, true
+
+	default:
+		return value, false
+	}
 }

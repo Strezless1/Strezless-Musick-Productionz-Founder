@@ -4,6 +4,8 @@ The official CLI for the Strezless Musick Nexus Metadata REST API.
 
 It is generated with [Stainless](https://www.stainless.com/).
 
+<!-- x-release-please-start-version -->
+
 ## Installation
 
 ### Installing with Go
@@ -11,7 +13,7 @@ It is generated with [Stainless](https://www.stainless.com/).
 To test or install the CLI locally, you need [Go](https://go.dev/doc/install) version 1.22 or later installed.
 
 ```sh
-go install 'github.com/stainless-sdks/strezless-musick-nexus-metadata-cli/cmd/strezless-musick-nexus-metadata@latest'
+go install 'github.com/omar-orrantia/Strezless-Musick-Productionz-Founder/cmd/strezless-musick-nexus-metadata@latest'
 ```
 
 Once you have run `go install`, the binary is placed in your Go bin directory:
@@ -25,6 +27,8 @@ If commands aren't found after installation, add the Go bin directory to your PA
 # Add to your shell profile (.zshrc, .bashrc, etc.)
 export PATH="$PATH:$(go env GOPATH)/bin"
 ```
+
+<!-- x-release-please-end -->
 
 ### Running Locally
 
@@ -45,18 +49,22 @@ strezless-musick-nexus-metadata [resource] <command> [flags...]
 
 ```sh
 strezless-musick-nexus-metadata pet update \
+  --api-key 'My API Key' \
   --name doggie \
-  --photo-url string \
-  --id 10 \
-  --category '{id: 1, name: Dogs}' \
-  --status available \
-  --tag '{id: 0, name: name}'
+  --photo-url string
 ```
 
 For details about specific commands, use the `--help` flag.
 
-### Global Flags
+### Environment variables
 
+| Environment variable                      | Required |
+| ----------------------------------------- | -------- |
+| `STREZLESS_MUSICK_NEXUS_METADATA_API_KEY` | yes      |
+
+### Global flags
+
+- `--api-key` (can also be set with `STREZLESS_MUSICK_NEXUS_METADATA_API_KEY` env var)
 - `--help` - Show command line usage
 - `--debug` - Enable debug logging (includes HTTP request/response details)
 - `--version`, `-v` - Show the CLI version
@@ -105,3 +113,23 @@ base64-encoding). Note that absolute paths will begin with `@file://` or
 ```bash
 strezless-musick-nexus-metadata <command> --arg @data://file.txt
 ```
+
+## Linking different Go SDK versions
+
+You can link the CLI against a different version of the Strezless Musick Nexus Metadata Go SDK
+for development purposes using the `./scripts/link` script.
+
+To link to a specific version from a repository (version can be a branch,
+git tag, or commit hash):
+
+```bash
+./scripts/link github.com/org/repo@version
+```
+
+To link to a local copy of the SDK:
+
+```bash
+./scripts/link ../path/to/strezlessmusicknexusmetadata-go
+```
+
+If you run the link script without any arguments, it will default to `../strezlessmusicknexusmetadata-go`.

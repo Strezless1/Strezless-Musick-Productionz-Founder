@@ -5,13 +5,16 @@ package cmd
 import (
 	"testing"
 
-	"github.com/stainless-sdks/strezless-musick-nexus-metadata-cli/internal/mocktest"
+	"github.com/omar-orrantia/Strezless-Musick-Productionz-Founder/internal/mocktest"
 )
 
 func TestStoreListInventory(t *testing.T) {
-	t.Skip("Prism tests are disabled")
-	mocktest.TestRunMockTestWithFlags(
-		t,
-		"store", "list-inventory",
-	)
+	t.Skip("Mock server tests are disabled")
+	t.Run("regular flags", func(t *testing.T) {
+		mocktest.TestRunMockTestWithFlags(
+			t,
+			"--api-key", "string",
+			"store", "list-inventory",
+		)
+	})
 }

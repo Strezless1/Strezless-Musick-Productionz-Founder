@@ -5,10 +5,9 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 
-	"github.com/stainless-sdks/strezless-musick-nexus-metadata-cli/internal/apiquery"
-	"github.com/stainless-sdks/strezless-musick-nexus-metadata-cli/internal/requestflag"
+	"github.com/omar-orrantia/Strezless-Musick-Productionz-Founder/internal/apiquery"
+	"github.com/omar-orrantia/Strezless-Musick-Productionz-Founder/internal/requestflag"
 	"github.com/stainless-sdks/strezless-musick-nexus-metadata-go"
 	"github.com/stainless-sdks/strezless-musick-nexus-metadata-go/option"
 	"github.com/tidwall/gjson"
@@ -242,8 +241,14 @@ func handleUserCreate(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "user create", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "user create",
+		Transform:      transform,
+	})
 }
 
 func handleUserRetrieve(ctx context.Context, cmd *cli.Command) error {
@@ -277,8 +282,14 @@ func handleUserRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "user retrieve", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "user retrieve",
+		Transform:      transform,
+	})
 }
 
 func handleUserUpdate(ctx context.Context, cmd *cli.Command) error {
@@ -368,8 +379,14 @@ func handleUserCreateWithList(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "user create-with-list", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "user create-with-list",
+		Transform:      transform,
+	})
 }
 
 func handleUserLogin(ctx context.Context, cmd *cli.Command) error {
@@ -402,8 +419,14 @@ func handleUserLogin(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "user login", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "user login",
+		Transform:      transform,
+	})
 }
 
 func handleUserLogout(ctx context.Context, cmd *cli.Command) error {

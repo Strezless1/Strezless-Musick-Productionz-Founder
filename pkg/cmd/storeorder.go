@@ -5,10 +5,9 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 
-	"github.com/stainless-sdks/strezless-musick-nexus-metadata-cli/internal/apiquery"
-	"github.com/stainless-sdks/strezless-musick-nexus-metadata-cli/internal/requestflag"
+	"github.com/omar-orrantia/Strezless-Musick-Productionz-Founder/internal/apiquery"
+	"github.com/omar-orrantia/Strezless-Musick-Productionz-Founder/internal/requestflag"
 	"github.com/stainless-sdks/strezless-musick-nexus-metadata-go"
 	"github.com/stainless-sdks/strezless-musick-nexus-metadata-go/option"
 	"github.com/tidwall/gjson"
@@ -108,8 +107,14 @@ func handleStoreOrderCreate(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "store:order create", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "store:order create",
+		Transform:      transform,
+	})
 }
 
 func handleStoreOrderRetrieve(ctx context.Context, cmd *cli.Command) error {
@@ -143,8 +148,14 @@ func handleStoreOrderRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "store:order retrieve", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "store:order retrieve",
+		Transform:      transform,
+	})
 }
 
 func handleStoreOrderDelete(ctx context.Context, cmd *cli.Command) error {

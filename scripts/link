@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-if [[ -n "$1" ]]; then
-  LOCAL_GO="$1"
-  shift
-else
-  LOCAL_GO=../strezless-musick-nexus-metadata-go
-fi
+# Mark the necessary Go modules as private to avoid Go's proxy
+export GOPRIVATE="${GOPRIVATE:+$GOPRIVATE,}github.com/stainless-sdks/strezless-musick-nexus-metadata-go"
 
-echo "==> Linking with local directory"
-go mod tidy -e
-go mod edit -replace github.com/stainless-sdks/strezless-musick-nexus-metadata-go="$LOCAL_GO"
+REPLACEMENT="${1:-"../strezless-musick-nexus-metadata-go"}"
+echo "==> Replacing Go SDK with $REPLACEMENT"
+if [[ -d "$REPLACEMENT" ]] || go list -m "$REPLACEMENT" >/dev/null; then
+    go mod edit -replace github.com/stainless-sdks/strezless-musick-nexus-metadata-go="$REPLACEMENT"
+    go mod tidy -e
+else
+    echo "Skipping Go SDK replacement (branch may not exist on Go SDK)"
+fi

@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/stainless-sdks/strezless-musick-nexus-metadata-cli/internal/apiquery"
-	"github.com/stainless-sdks/strezless-musick-nexus-metadata-cli/internal/binaryparam"
-	"github.com/stainless-sdks/strezless-musick-nexus-metadata-cli/internal/requestflag"
+	"github.com/omar-orrantia/Strezless-Musick-Productionz-Founder/internal/apiquery"
+	"github.com/omar-orrantia/Strezless-Musick-Productionz-Founder/internal/binaryparam"
+	"github.com/omar-orrantia/Strezless-Musick-Productionz-Founder/internal/requestflag"
 	"github.com/stainless-sdks/strezless-musick-nexus-metadata-go"
 	"github.com/stainless-sdks/strezless-musick-nexus-metadata-go/option"
 	"github.com/tidwall/gjson"
@@ -225,9 +225,10 @@ var petUploadImage = cli.Command{
 			Required: true,
 		},
 		&requestflag.Flag[string]{
-			Name:     "body",
-			Required: true,
-			BodyRoot: true,
+			Name:      "body",
+			Required:  true,
+			BodyRoot:  true,
+			FileInput: true,
 		},
 		&requestflag.Flag[string]{
 			Name:      "additional-metadata",
@@ -269,8 +270,14 @@ func handlePetCreate(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "pet create", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "pet create",
+		Transform:      transform,
+	})
 }
 
 func handlePetRetrieve(ctx context.Context, cmd *cli.Command) error {
@@ -304,8 +311,14 @@ func handlePetRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "pet retrieve", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "pet retrieve",
+		Transform:      transform,
+	})
 }
 
 func handlePetUpdate(ctx context.Context, cmd *cli.Command) error {
@@ -338,8 +351,14 @@ func handlePetUpdate(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "pet update", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "pet update",
+		Transform:      transform,
+	})
 }
 
 func handlePetDelete(ctx context.Context, cmd *cli.Command) error {
@@ -397,8 +416,14 @@ func handlePetFindByStatus(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "pet find-by-status", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "pet find-by-status",
+		Transform:      transform,
+	})
 }
 
 func handlePetFindByTags(ctx context.Context, cmd *cli.Command) error {
@@ -431,8 +456,14 @@ func handlePetFindByTags(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "pet find-by-tags", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "pet find-by-tags",
+		Transform:      transform,
+	})
 }
 
 func handlePetUpdateWithForm(ctx context.Context, cmd *cli.Command) error {
@@ -516,6 +547,12 @@ func handlePetUploadImage(ctx context.Context, cmd *cli.Command) error {
 
 	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
+	explicitFormat := cmd.Root().IsSet("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON(os.Stdout, "pet upload-image", obj, format, transform)
+	return ShowJSON(obj, ShowJSONOpts{
+		ExplicitFormat: explicitFormat,
+		Format:         format,
+		Title:          "pet upload-image",
+		Transform:      transform,
+	})
 }
